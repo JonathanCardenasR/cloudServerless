@@ -9,6 +9,7 @@ from base64 import b64encode
 ociMessageEndpoint = "https://kub757l47naa.streaming.us-ashburn-1.oci.oraclecloud.com"
 ociStreamOcid = "ocid1.stream.oc1.iad.amaaaaaa62teq4iakgzdobxobtobdf3mrjt2fdj74muyzcguq34jaaukwhsq"
 ociConfigFilePath = "/function/conf.ini"
+pruebaCarpeta = "~/conf.ini"
 ociProfileName = "DEFAULT"
 
 config = oci.config.from_file(ociConfigFilePath, ociProfileName)
@@ -16,10 +17,11 @@ stream_client = oci.streaming.StreamClient(config, service_endpoint=ociMessageEn
 
 
 def handler(ctx, data: io.BytesIO = None):
-    
+
+    body = json.loads(data.getvalue())
     key = "ulima"
-    tipo = "variable"
-    fecha = "variable2"
+    tipo = body.get("tipo")
+    fecha = body.get("fecha")
 
     value = json.dumps({'tipo':tipo, 'fecha':fecha})
 
