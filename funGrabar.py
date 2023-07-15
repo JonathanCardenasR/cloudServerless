@@ -9,7 +9,6 @@ from base64 import b64encode
 ociMessageEndpoint = "https://kub757l47naa.streaming.us-ashburn-1.oci.oraclecloud.com"
 ociStreamOcid = "ocid1.stream.oc1.iad.amaaaaaa62teq4iakgzdobxobtobdf3mrjt2fdj74muyzcguq34jaaukwhsq"
 ociConfigFilePath = "/function/conf.ini"
-pruebaCarpeta = "~/conf.ini"
 ociProfileName = "DEFAULT"
 
 config = oci.config.from_file(ociConfigFilePath, ociProfileName)
