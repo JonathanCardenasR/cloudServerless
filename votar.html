@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cloud parte 5</title>
+</head>
+
+<body style="display: grid; place-content: center;">
+  <div class="container" style="width: 600px; height: 250px; border: 1px solid black">
+
+    <h1 style="text-align: center;">Votación</h1>
+    <div class="div" style="display: flex; justify-content: space-evenly;">
+      <h3>Seleccione en su preferencia</h3>
+      <select name="" id="lista" style="width: 200px;">
+        <!-- Opciones vacías, se llenarán con los datos de la lista -->
+      </select>
+    </div>
+    <div style="text-align: right; padding: 5%;">
+      <button style="width: 100px; height: 50px;" onclick="realizarPOST()">Votar</button>
+    </div>
+
+  </div>
+  <script>
+    function obtenerLista() {
+      return fetch('https://lybo7zbqcbbjhnxhje767fdgmu.apigateway.us-ashburn-1.oci.customer-oci.com/api/get_tipo')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error al obtener la lista');
+          }
+          return response.json();
+        })
+        .then(json => {
+          const lista = json.lista[0];
+          const select = document.getElementById('lista');
+          lista.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.tipo;
+            select.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error al obtener la lista:', error);
+        });
+    }
+
+    function realizarPOST() {
+    const select = document.getElementById('lista');
+    const selectedOption = select.options[select.selectedIndex];
+    const nombreItem = selectedOption.textContent;
+    const fechaItem = new Date();
+
+    // Crea un objeto con los datos a enviar en el POST
+    const data = {
+      tipo: nombreItem,
+      fecha: fechaItem
+    };
+
+    // Realiza la solicitud POST
+    fetch('https://lybo7zbqcbbjhnxhje767fdgmu.apigateway.us-ashburn-1.oci.customer-oci.com/api/post_tipo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error al realizar el POST');
+        }
+        console.log('POST exitoso');
+        // Aquí puedes realizar alguna acción adicional después del POST exitoso
+      })
+      .catch(error => {
+        console.error('Error al realizar el POST:', error);
+      });
+    
+    console.log(JSON.stringify(data))
+  }
+
+  
+  </script>
+  <script>
+    obtenerLista();
+  </script>
+</body>
+
+</html>
