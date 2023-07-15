@@ -4,41 +4,42 @@ import logging
 import oci
 
 from fdk import response
+from base64 import b64encode
+
+ociMessageEndpoint = "https://kub757l47naa.streaming.us-ashburn-1.oci.oraclecloud.com"
+ociStreamOcid = "ocid1.stream.oc1.iad.amaaaaaa62teq4iakgzdobxobtobdf3mrjt2fdj74muyzcguq34jaaukwhsq"
+ociConfigFilePath = "/function/conf.ini"
+pruebaCarpeta = "~/conf.ini"
+ociProfileName = "DEFAULT"
+
+config = oci.config.from_file(ociConfigFilePath, ociProfileName)
+stream_client = oci.streaming.StreamClient(config, service_endpoint=ociMessageEndpoint)
 
 
 def handler(ctx, data: io.BytesIO = None):
     
-    oci_configuration = oci.config.from_file("config.ini","DEFAULT")
-    oci_service_endpoint = "https://cell-1.queue.messaging.us-ashburn-1.oci.oraclecloud.com"
-    oci_queue_id = ocid1.fnapp.oc1.iad.aaaaaaaa5vkl66ihuu4qbgddbdgvpe4w725irlcgebanxtbzv27sbechoh7q
-    oci_queue_client = oci.queue.QueueClient(config=oci_configuration, service_endpoint=oci_service_endpoint)
-    
-    tipo = "Peruana"
-    
+    key = "ulima"
+    tipo = "variable"
+    fecha = "variable2"
+
+    value = json.dumps({'tipo':tipo, 'fecha':fecha})
+
     try:
         
-        body = json.loads(data.getvalue())
         
-        tipo = body.get("tipo")
+        encoded_key = b64encode(key.encode()).decode()
+        encoded_value = b64encode(value.encode()).decode()
+        mensaje = oci.streaming.models.PutMessagesDetailsEntry(key=encoded_key, value=encoded_value)
         
-    except (Exception, ValueError) as ex:
-        
-        logging.getLogger().info('error parsing json payload: ' + str(ex))
+        lista_mensaje = oci.streaming.models.PutMessagesDetails(messages=[mensaje])
 
-    logging.getLogger().info("Inside Python Hello World function")
+        put_message_result = stream_client.put_messages(ociStreamOcid, lista_mensaje)
+
+        logging.getLogger().info(put_message_result)
+        
+    except (Exception,ValueError) as identifier:
+        logging.getLogger().info(str(identifier))
     
-    return response.Response(
-        
-        response = publish_message(oci_queue_client,oci_queue_id,message_content=tipo)
-        
+    return response.Response( 
+        ctx, response_data=json.dumps({'tipo':tipo, 'fecha':fecha}),headers={"Content-Type":"application/json"}
     )
-
-
-def publish_message(oci_queue_client, oci_queue_id, message_content):
-        publish_message_response = oci_queue_client.put_messages(
-        queue_id=oci_queue_id,
-        put_messages_details=oci.queue.models.PutMessagesDetails(
-            messages=[
-                oci.queue.models.PutMessagesDetailsEntry(content=message_content)])
-        )
-        return publish_message_response
