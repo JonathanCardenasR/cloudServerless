@@ -1,6 +1,8 @@
-
+from __future__ import print_function
+from datetime import date, datetime, timedelta
 from kafka import KafkaConsumer
 import mysql.connector
+import json
 
 consumer = KafkaConsumer(
     'ulima',
@@ -14,30 +16,29 @@ consumer = KafkaConsumer(
 
 
 for dato in consumer:
-    
-  dato.value.decode()
-  
-  tipo = dato.value.decode().split(",")[0]
-  fecha = dato.value.decode().split(",")[1]
-  
+
+
+
+  body = json.loads(dato.value.decode())
+  tipo = body.get("tipo")
+  fecha = body.get("fecha")[:10]
+
+  print(f"El dato es: {body}")
+
+  print(f"datos son: {tipo} {fecha}")
+
   cnx = mysql.connector.connect(user='admin', password='.1adminSQL1.',
                               host='20.1.2.234',
                               database='exam4')
   cursor = cnx.cursor()
-  
-  query = ("INSERT INTO votacion "
-               "(tipo, fecha) "
-               "VALUES (%s, %s,)")
-  
-  data_query= ("prueba","01-01-2011")
-  
-  
-  cursor.execute(query, data_query)
+
+  query = f"INSERT INTO votacion (tipo, fecha) VALUES ('{tipo}','{fecha}');"
+
+  cursor.execute(query)
   cnx.commit()
-  
+
   cursor.close()
   cnx.close()
-    
-  print("%s:%d:%d: key=%s valor%s" % (dato.topic,dato.partition,dato.offset,dato.key,dato.value))
 
+  print("%s:%d:%d: key=%s valor%s" % (dato.topic,dato.partition,dato.offset,dato.key,dato.value))
 
